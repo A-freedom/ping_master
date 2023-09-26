@@ -81,24 +81,3 @@ class _AddHostState extends State<AddHost> {
   }
 }
 
-// class Host.dart {
-//   late final String _domainOrIP;
-//   late final String _ipAddress;
-//
-//   String get domainOrIP => _domainOrIP;
-//
-//   String get ipAddress => _ipAddress;
-//
-//
-//
-//   @override
-//   bool operator ==(Object other) {
-//     if (identical(this, other)) return true;
-//
-//     return other is Host.dart && _domainOrIP == other._domainOrIP;
-//   }
-//
-//   @override
-//   int get hashCode => _domainOrIP.hashCode;
-// }
-

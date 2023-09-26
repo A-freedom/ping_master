@@ -23,7 +23,7 @@ class PingDataProvider extends ChangeNotifier {
   }
 
   void removeHost(int index){
-    hosts.removeAt;
+    hosts.removeAt(index);
     notifyListeners();
   }
 }
