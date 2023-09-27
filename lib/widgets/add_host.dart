@@ -50,7 +50,7 @@ class _AddHostState extends State<AddHost> {
               ? null
               : () {
                   final enteredText = _textController.text;
-                  context.read<PingDataProvider>().addHost(enteredText);
+                  context.read<HostDataProvider>().addHost(enteredText);
                   Navigator.of(context).pop();
                 },
           child: const Text('Submit'),

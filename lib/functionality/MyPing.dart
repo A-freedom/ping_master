@@ -38,13 +38,27 @@ class PingHosts {
   }
 
   void _createPingStreamControllers() {
-    for (final host in _context.watch<PingDataProvider>().hosts) {
-      if (_pingResultControllers.containsKey(host)) continue;
-      final controller = StreamController<PingResult>.broadcast();
-      _pingResultControllers[host] = controller;
-      _pingInProgress[host] = false;
+    final currentHosts = _context.watch<HostDataProvider>().hosts.toSet();
+
+    for (final host in _pingResultControllers.keys.toList()) {
+      if (!currentHosts.contains(host)) {
+        // Remove controllers for hosts that were removed
+        // _pingResultControllers[host]!.close(); // Close the controller
+        _pingResultControllers.remove(host); // Remove it from the map
+        _pingInProgress.remove(host); // Remove any associated data
+      }
+    }
+
+    for (final host in currentHosts) {
+      if (!_pingResultControllers.containsKey(host)) {
+        final controller = StreamController<PingResult>.broadcast();
+        _pingResultControllers[host] = controller;
+        _pingInProgress[host] = false;
+      }
     }
   }
+
+
 
   void _startPingUpdates() {
     const pingUpdateInterval = Duration(milliseconds: 100);

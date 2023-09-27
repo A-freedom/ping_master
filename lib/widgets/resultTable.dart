@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:provider/provider.dart';
 
 import '../functionality/MyPing.dart';
@@ -10,7 +12,8 @@ import '../provider/ping_data_provider.dart';
 
 
 class PingTable extends StatefulWidget {
-  const PingTable({Key? key});
+  const PingTable({super.key});
+
 
   @override
   _PingTableState createState() => _PingTableState();
@@ -39,7 +42,7 @@ class _PingTableState extends State<PingTable> {
       dataTextStyle: Theme.of(context).textTheme.bodyLarge,
       headingTextStyle:  Theme.of(context).textTheme.titleMedium,
       headingRowColor: MaterialStateColor.resolveWith((states) {
-        return Theme.of(context).colorScheme.inversePrimary ?? Colors.white;
+        return Theme.of(context).colorScheme.inversePrimary;
       }),
       // sortColumnIndex: 0,
       // sortAscending: true,
@@ -63,89 +66,57 @@ class _PingTableState extends State<PingTable> {
           label: Text('', textAlign: TextAlign.center),
         ),
       ],
-      rows: List<DataRow>.generate(
-        pingResultControllers.keys.length,
-            (index) {
-          final Host host = pingResultControllers.keys.toList()[index];
-          return DataRow(
-            cells: [
-              DataCell(Text(host.hostName)),
-              DataCell(
-                StreamBuilder<PingResult>(
-                  stream: pingResultControllers[host]?.stream,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const CircularProgressIndicator();
-                    } else if (snapshot.hasError) {
-                      return Text('Error: ${snapshot.error}');
-                    } else if (!snapshot.data!.succeed) {
-                      return const Text('N/A');
-                    }
+      rows: generateDataRows(pingResultControllers),
+    );
+  }
 
-                    final pingResult = snapshot.data;
-                    return Text(pingResult!.max.toStringAsFixed(2));
-                  },
-                ),
-              ),
-              DataCell(
-                StreamBuilder<PingResult>(
-                  stream: pingResultControllers[host]?.stream,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const CircularProgressIndicator();
-                    } else if (snapshot.hasError) {
-                      return Text('Error: ${snapshot.error}');
-                    } else if (!snapshot.data!.succeed) {
-                      return const Text('N/A');
-                    }
+  List<DataRow> generateDataRows(pingResultControllers) {
+    final List<Host> hosts = pingResultControllers.keys.toList();
 
-                    final pingResult = snapshot.data;
-                    return Text(pingResult!.avg.toStringAsFixed(2));
-                  },
-                ),
-              ),
-              DataCell(
-                StreamBuilder<PingResult>(
-                  stream: pingResultControllers[host]?.stream,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const CircularProgressIndicator();
-                    } else if (snapshot.hasError) {
-                      return Text('Error: ${snapshot.error}');
-                    } else if (!snapshot.data!.succeed) {
-                      return const Text('N/A');
-                    }
+    return List<DataRow>.generate(
+      hosts.length,
+          (index) {
+        final Host host = hosts[index];
+        final StreamController<PingResult>? controller = pingResultControllers[host];
 
-                    final pingResult = snapshot.data;
-                    return Text(pingResult!.min.toStringAsFixed(2));
-                  },
-                ),
+        return DataRow(
+          cells: [
+            DataCell(Text(host.hostName)),
+            DataCell(buildPingResultWidget(controller, (pingResult) => pingResult.max.toStringAsFixed(0))),
+            DataCell(buildPingResultWidget(controller, (pingResult) => pingResult.avg.toStringAsFixed(0))),
+            DataCell(buildPingResultWidget(controller, (pingResult) => pingResult.min.toStringAsFixed(0))),
+            DataCell(buildPingResultWidget(controller, (pingResult) => pingResult.packetLoos.toStringAsFixed(0))),
+            DataCell(
+              IconButton(
+                icon: const Icon(Icons.delete_forever),
+                onPressed: () {
+                  context.read<HostDataProvider>().removeHost(index);
+                },
               ),
-              DataCell(
-                StreamBuilder<PingResult>(
-                  stream: pingResultControllers[host]?.stream,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const CircularProgressIndicator();
-                    } else if (snapshot.hasError) {
-                      return Text('Error: ${snapshot.error}');
-                    } else if (!snapshot.hasData) {
-                      return const Text('N/A');
-                    }
+            ),
+          ],
+        );
+      },
+    );
+  }
 
-                    final pingResult = snapshot.data;
-                    return Text(pingResult!.packetLoos.toString());
-                  },
-                ),
-              ),
-              DataCell(IconButton(icon: const Icon(Icons.delete_forever), onPressed: () {
-                context.read<PingDataProvider>().removeHost(index) ;
-              },))
-              
-            ],
-          );
-        },
-      ),
+
+  Widget buildPingResultWidget(StreamController<PingResult>? controller, String Function(PingResult) valueExtractor) {
+    return  StreamBuilder<PingResult>(
+      stream: controller?.stream,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator();
+        } else if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        } else if (!snapshot.hasData) {
+          return const Text('N/A');
+        }
+
+        final pingResult = snapshot.data;
+        return Text(valueExtractor(pingResult!));
+      },
     );
   }
 }
+

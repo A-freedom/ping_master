@@ -1,7 +1,7 @@
 class PingResult {
-  late double min;
-  late double max;
-  late double avg;
-  late double packetLoos;
+  double min = double.infinity;
+  double max = double.infinity;
+  double avg = double.infinity ;
+  double packetLoos = double.infinity ;
   late bool succeed = false;
 }
