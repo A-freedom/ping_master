@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:dart_ping/dart_ping.dart';
+import 'package:flutter/foundation.dart';
 import '../provider/ping_data_provider.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
@@ -77,7 +78,9 @@ class PingHosts {
           }
         }
       } catch (e) {
-        print(e);
+        if (kDebugMode) {
+          print(e);
+        }
       }
     });
   }

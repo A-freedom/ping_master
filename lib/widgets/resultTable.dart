@@ -48,7 +48,7 @@ class _PingTableState extends State<PingTable> {
       // sortAscending: true,
       columns: const [
         DataColumn(
-          label: Text('Host',maxLines: 1,overflow: TextOverflow.clip,),
+          label: Text('Host', textAlign:  TextAlign.center,),
         ),
         DataColumn(
           label: Text('Max', textAlign: TextAlign.center),
@@ -108,13 +108,13 @@ class _PingTableState extends State<PingTable> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const CircularProgressIndicator();
         } else if (snapshot.hasError) {
-          return Text('Error: ${snapshot.error}');
+          return Text('Error: ${snapshot.error}',maxLines: 1,overflow: TextOverflow.clip,);
         } else if (!snapshot.hasData) {
-          return const Text('N/A');
+          return const Text('N/A',maxLines: 1,overflow: TextOverflow.clip,);
         }
 
         final pingResult = snapshot.data;
-        return Text(valueExtractor(pingResult!));
+        return Text(valueExtractor(pingResult!),maxLines: 1,overflow: TextOverflow.clip,);
       },
     );
   }
